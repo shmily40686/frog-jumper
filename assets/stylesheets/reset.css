@@ -1,0 +1,6 @@
+/*
+    This file is used to reset CSS applied by default by browsers.
+*/
+body {
+    margin: 0;
+}
