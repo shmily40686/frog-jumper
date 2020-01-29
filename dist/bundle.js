@@ -82,16 +82,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const backgroundCanvas = document.getElementById('background-canvas');
     const backgroundCanvasContext = backgroundCanvas.getContext('2d');
 
-    const foregroundCanvas = document.getElementById('foreground-canvas');
-    const foregroundCanvasContext = foregroundCanvas.getContext('2d');
+    // const foregroundCanvas = document.getElementById('foreground-canvas');
+    // const foregroundCanvasContext = foregroundCanvas.getContext('2d');
 
     const game = new Game(
         gameCanvasContext,
         gameCanvas,
-        backgroundCanvasContext,
-        foregroundCanvasContext);
+        backgroundCanvasContext)
     
     game.draw();
+    window.addEventListener('keydown', game.jump);
 });
 
 /***/ }),
@@ -99,7 +99,8 @@ document.addEventListener('DOMContentLoaded', () => {
 /***/ (function(module, exports, __webpack_require__) {
 
 const Background = __webpack_require__(2);
-const Player = __webpack_require__(3)
+const Player = __webpack_require__(3);
+const Mushroom = __webpack_require__(4);
 
 class Game {
     constructor(ctx, gameCanvas, backgroundCtx, foregroundCtx) {
@@ -107,6 +108,7 @@ class Game {
         this.gameCanvas = gameCanvas;
         this.backgroundCtx = backgroundCtx;
         this.foregroundCtx = foregroundCtx;
+        this.start = "stop"
         
         this.jump = this.jump.bind(this);
         this.draw = this.draw.bind(this);
@@ -114,28 +116,37 @@ class Game {
 
         this.createBackground(backgroundCtx, foregroundCtx);
         this.createPlayer(ctx)
+        this.createMushroom(ctx)
+        // setInterval(() => {
+        //     this.player.selfJump()
+        // }, 1500);
 
-        this.setButtonListeners();
+        // this.setButtonListeners();
     }
 
     jump(event) {
-        if (event.code === 32 ) {
+        if (event.code === "Space" ) {
             event.preventDefault();
-            console.log("hi")
-            this.player.jump() 
+            this.player.performJump()
+            this.start = "start"
         }
     }
 
-    setButtonListeners() {
-        this.gameCanvas.addEventListener('keydown', this.jump);
-        // this.gameCanvas.addEventListener('keydown', this.resetGame);
-    }
+    // setButtonListeners() {
+    //     console.log(this.gameCanvas); 
+    //     this.gameCanvas.addEventListener('click', () => console.log('hi')); 
+    //     this.gameCanvas.addEventListener('keydown', this.jump);
+    //     // window.addEventListener('click', () => console.log('hello'))
+    //     // this.gameCanvas.addEventListener('keydown', this.resetGame);
+    // }
 
     createBackground(backgroundCtx, foregroundCtx) {
         const backgroundImage = new Image();
+        // backgroundImage.src = './assets/images/sky.jpg';
         backgroundImage.src = './assets/images/background.png';
         // backgroundImage.src = 'https://freedesignfile.com/upload/2016/03/Grass-with-blue-sky-spring-vectors-01.jpg'
         this.background = new Background(backgroundCtx, backgroundImage, 0, 750, 0.8);
+        this.preBackground = new Background(backgroundCtx, backgroundImage, 0, 750, 0)
 
         // const foregroundImage = new Image();
         // foregroundImage.src = './assets/images/grass_bg.png';
@@ -145,16 +156,82 @@ class Game {
     createPlayer(ctx) {
         const frogImage = new Image()
         frogImage.src = './assets/images/frog.png'
-        this.player = new Player(ctx,frogImage,500,5)
+        this.player = new Player(ctx,frogImage,440,5)
+    }
+
+    createMushroom(ctx) {
+       const mushroomImage = new Image()
+       mushroomImage.src = './assets/images/mushroom.png';
+       this.mushroom1 = new Mushroom(ctx,mushroomImage,800,440, 4)
+       this.mushroom2 = new Mushroom(ctx, mushroomImage, 1200, 440, 4)
     }
 
     draw() {
         requestAnimationFrame(this.draw);
-        this.background.draw();
-        this.player.update(this.ctx);
-        // this.foreground.draw();
+        if(this.start === "stop") {
+            this.preBackground.draw() 
+            this.player.draw();
+        } else if (this.start === "start") {
+            this.background.draw();
+            this.player.draw();
+            this.mushroom1.draw();
+            this.mushroom2.draw(); 
+            // calculate was there collision
+            //
+            // player position
+            const player = this.player.getPosition();
+            // mushroom positions
+            const mushrooms = [
+                this.mushroom1.getPosition(),
+                this.mushroom2.getPosition(),
+            ];
+
+            // .some on [mushrooms] was there collision?
+            if (mushrooms.some(mushroom => {
+                let spacing = 70;
+                let tolerance = 50;
+
+               if (mushroom[0] > player[0] + spacing || player[0] - mushroom[0] >= spacing) {
+                   // collision not possible
+                   return false;
+               } else {
+                   // player can collide with mushroom
+                   if (mushroom[0] > player[0]) {
+                       // Mushroom is to the right, player can run into mushroom or land on it.
+                       return mushroom[0] + mushroom[1] < player[0] + player[1] + spacing;
+                   } else {
+                       // Frog is to the right of the mushroom.
+                       return Math.abs(player[0] - mushroom[0]) + Math.abs(player[1] - mushroom[1]) + (tolerance / 8) < spacing;
+                   }
+               }
+            })) {
+                // stop
+                this.stopPlaying();
+            }
+        } else if (this.start === "die") {
+            return 
+        }
+
     }
 
+    stopPlaying() {
+        this.start = "die";
+        const cover = document.createElement("div")
+        const button = document.createElement("button")
+        const dom = document.getElementsByClassName("main-div")[0]
+        cover.classList.add("cover-die");
+        button.classList.add("cover-die-button");
+        button.innerText = "Restart"
+        cover.appendChild(button)
+        dom.appendChild(cover)
+
+        button.addEventListener("click", () => {
+            console.log("dom",dom)
+            console.log("cover", cover)
+            dom.removeChild(cover)
+            this.start = "start"
+        })
+    }
 }
 
 module.exports = Game;
@@ -205,66 +282,112 @@ class Player {
         this.image = image;
         this.speed = speed;
         this.isJump = true
-        this.x = 0;
+        this.x = 100;
         this.y = posY;
         this.jumping = false;
-        this.jumpCount = 0;
-        this.position = [100,100];
+        this.size = [100,100];
 
-        this.update = this.update.bind(this);
-        this.jump = this.jump.bind(this);
+        this.jumpImage = this.jumpImage.bind(this);
+        this.jumping = false;
+        this.selfJumpImg = this.selfJumpImg.bind(this);
+        this.sefJumping = false;
+        this.getPosition = this.getPosition.bind(this);
 
     }
 
-    draw(ctx) {
+    draw() {
         this.ctx.clearRect(0, 0, 800, 600);
-        this.ctx.drawImage(this.image, this.x, this.y, this.position[0], this.position[1]);
-        setInterval(() => {
-            this.jumpImage();
-            this.isJump = !this.isJump
-        },1000)
-        this.walkImage()
+        this.ctx.drawImage(this.image, this.x, this.y, this.size[0], this.size[1]);
     }
 
-    walkImage() {
-        this.x += 0.1
+    selfJump() {
+        this.jumping = true;
+        this.jumpImage()
     }
 
-    jumpImage() {
-        if (this.isJump) {
-            this.y -= this.speed;
-        } else {
-            this.y += this.speed;
-        }
-    }
-
-    jump() {
+    selfJumpImg() {
         const gravity = 0.40;
         const initialSpeed = 12;
-        if (this.jumping) {
-            if (this.jumpCount === 0 || !this.onGround()) {
-                this.position[1] -= initialSpeed - gravity * this.jumpCount;
-                this.jumpCount += 1;
+        if (this.y > 600 && this.jumping) {
+            this.y -= initialSpeed - gravity;
+            requestAnimationFrame(this.selfJumpImg)
+        } else {
+            this.jumping = false
+            if (this.y >= 440) {
+                return
             } else {
-                this.position[1] = 100;
-                this.jumpCount = 0;
-                this.jumping = false;
+                this.y += this.speed;
+                requestAnimationFrame(this.selfJumpImg)
             }
         }
     }
 
-    update(ctx) {
-        this.jump();
-        this.draw(ctx);
+    performJump() {
+        this.jumping = true;
+        this.jumpImage()
     }
 
+    jumpImage() {
+        const gravity = 0.40;
+        const initialSpeed = 12;
+        if (this.y > 200 && this.jumping) {
+            this.y -= initialSpeed - gravity ;
+            requestAnimationFrame(this.jumpImage)
+        } else {
+            this.jumping = false
+            if (this.y >= 440) {
+                return
+            } else {
+                this.y += this.speed;
+                requestAnimationFrame(this.jumpImage)
+            }
+        }
+    }
 
-    onGround() {
-        return this.position[0] === 100 && this.position[1] >= 100;
+    getPosition() {
+        return [this.x, this.y];
     }
 }
 
 module.exports = Player;
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports) {
+
+class Mushroom {
+    constructor(ctx, image,x, y, speed) {
+        this.ctx = ctx;
+        this.image = image;
+        this.x = x;
+        this.y = y;
+        this.speed = speed;
+        this.size = [100, 100];
+        this.getPosition = this.getPosition.bind(this);
+    }  
+
+    move() {
+        this.x -= this.speed;
+        setInterval(() => {
+            this.speed += 0.0001
+        },50000)
+        if(this.x < -100) {
+            this.x = 800
+        } 
+    }
+
+    draw(ctx) {
+        // this.ctx.clearRect(0, 0, 800, 600);
+        this.ctx.drawImage(this.image, this.x, this.y, this.size[0], this.size[1]);
+        this.move()
+    }
+
+    getPosition() {
+        return [this.x, this.y];
+    }
+}
+
+module.exports = Mushroom;
 
 /***/ })
 /******/ ]);

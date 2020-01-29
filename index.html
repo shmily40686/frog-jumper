@@ -6,11 +6,29 @@
         <script type="text/javascript" src="./dist/bundle.js"></script>
     </head>
     <body>
-        <main>
-            <canvas id="game-canvas" height="600" width="800"></canvas>
-            <canvas id="background-canvas" height="600" width="800"></canvas>
-            <canvas id="foreground-canvas" height="600" width="800"></canvas>
-        </main>
+        <div class="main-div">
+            <div id="game-title">Frog Jumper</div>
+            <main>
+                <div id="menu">
+                   <button id="start-game">Start Jump</button> 
+                </div>
+                <canvas id="background-canvas" height="600" width="800"></canvas>
+                <canvas id="game-canvas" height="600" width="800"></canvas>
+                <canvas id="foreground-canvas" height="600" width="800"></canvas>
+            </main>
+        </div>
     </body>
-    
+    <script>
+        const buttonStart = document.getElementById("start-game")
+        const menu = document.getElementById("menu")
+
+        function startGame () {
+            // menu.style.display = "none"
+            menu.style[" -webkit-animation"] = "fadeOut 1s"
+            menu.style["animation"] = "fadeOut 1s"
+            menu.style["animation-fill-mode"] = "forwards"
+        }
+        buttonStart.addEventListener("click", startGame)
+
+    </script>
 </html>
