@@ -88,10 +88,32 @@ document.addEventListener('DOMContentLoaded', () => {
     const game = new Game(
         gameCanvasContext,
         gameCanvas,
-        backgroundCanvasContext)
+        backgroundCanvasContext,
+        "stop"
+        )
     
     game.draw();
     window.addEventListener('keydown', game.jump);
+
+
+
+    const buttonReStart = document.getElementById("cover-die-button")
+    const cover = document.getElementById("cover-die")
+    const score = document.getElementById("score")
+    function reStartGame() {
+        cover.style.display = "none";
+        score.innerText = "0"
+        const game = new Game(
+            gameCanvasContext,
+            gameCanvas,
+            backgroundCanvasContext,
+            "start"
+        )
+        game.draw();
+        window.addEventListener('keydown', game.jump);
+    }
+
+    buttonReStart.addEventListener("click", reStartGame)
 });
 
 /***/ }),
@@ -101,56 +123,52 @@ document.addEventListener('DOMContentLoaded', () => {
 const Background = __webpack_require__(2);
 const Player = __webpack_require__(3);
 const Mushroom = __webpack_require__(4);
-
+const Bean = __webpack_require__(5)
 class Game {
-    constructor(ctx, gameCanvas, backgroundCtx, foregroundCtx) {
+    constructor(ctx, gameCanvas, backgroundCtx,action) {
         this.ctx = ctx;
         this.gameCanvas = gameCanvas;
         this.backgroundCtx = backgroundCtx;
-        this.foregroundCtx = foregroundCtx;
-        this.start = "stop"
+        this.start = action
         
         this.jump = this.jump.bind(this);
         this.draw = this.draw.bind(this);
-        // this.resetGame = this.resetGame.bind(this);
+        this.called = false
 
-        this.createBackground(backgroundCtx, foregroundCtx);
+        this.createBackground(backgroundCtx);
         this.createPlayer(ctx)
         this.createMushroom(ctx)
-        // setInterval(() => {
-        //     this.player.selfJump()
-        // }, 1500);
-
-        // this.setButtonListeners();
+        this.createBeans(gameCanvas,ctx)
+        this.collisionWithBean = this.collisionWithBean.bind(this)
     }
 
     jump(event) {
         if (event.code === "Space" ) {
             event.preventDefault();
-            this.player.performJump()
-            this.start = "start"
+            if (!this.called) { 
+                const m = document.getElementById("menu")
+                if (m.dataset.check === "off") {
+                    if (this.start !== "die") {
+                        this.player.performJump()
+                        this.start = "start"
+                        this.called = true
+                        let that = this
+                        setTimeout(() => {
+                            that.called = false
+                         },350)
+                    }
+                } 
+            } 
         }
     }
 
-    // setButtonListeners() {
-    //     console.log(this.gameCanvas); 
-    //     this.gameCanvas.addEventListener('click', () => console.log('hi')); 
-    //     this.gameCanvas.addEventListener('keydown', this.jump);
-    //     // window.addEventListener('click', () => console.log('hello'))
-    //     // this.gameCanvas.addEventListener('keydown', this.resetGame);
-    // }
 
     createBackground(backgroundCtx, foregroundCtx) {
         const backgroundImage = new Image();
-        // backgroundImage.src = './assets/images/sky.jpg';
         backgroundImage.src = './assets/images/background.png';
-        // backgroundImage.src = 'https://freedesignfile.com/upload/2016/03/Grass-with-blue-sky-spring-vectors-01.jpg'
         this.background = new Background(backgroundCtx, backgroundImage, 0, 750, 0.8);
         this.preBackground = new Background(backgroundCtx, backgroundImage, 0, 750, 0)
 
-        // const foregroundImage = new Image();
-        // foregroundImage.src = './assets/images/grass_bg.png';
-        // this.foreground = new Background(foregroundCtx, foregroundImage, 0, 750, 6);
     }
 
     createPlayer(ctx) {
@@ -166,16 +184,26 @@ class Game {
        this.mushroom2 = new Mushroom(ctx, mushroomImage, 1200, 440, 4)
     }
 
+    createBeans(gameCanvas,ctx) {
+        this.bean = new Bean(gameCanvas,ctx, 5)
+    }
+
     draw() {
         requestAnimationFrame(this.draw);
+        const score = document.getElementById("score")
+        const info = document.getElementById("menu-info")
         if(this.start === "stop") {
             this.preBackground.draw() 
             this.player.draw();
+            info.style.display = "flex"
         } else if (this.start === "start") {
+            info.style.display = "none"
             this.background.draw();
             this.player.draw();
             this.mushroom1.draw();
-            this.mushroom2.draw(); 
+            this.mushroom2.draw();
+            this.bean.draw()
+            // score.innerText = parseInt(score.innerText) + 0.1
             // calculate was there collision
             //
             // player position
@@ -186,9 +214,17 @@ class Game {
                 this.mushroom2.getPosition(),
             ];
 
+            if(this.collisionWithBean(player)) {
+                score.innerText = parseInt(score.innerText) + 100
+                this.bean.clean()
+                this.bean = new Bean(this.gameCanvas, this.ctx, 5)
+            }
+           
+
+
             // .some on [mushrooms] was there collision?
             if (mushrooms.some(mushroom => {
-                let spacing = 70;
+                let spacing = 90;
                 let tolerance = 50;
 
                if (mushroom[0] > player[0] + spacing || player[0] - mushroom[0] >= spacing) {
@@ -207,30 +243,37 @@ class Game {
             })) {
                 // stop
                 this.stopPlaying();
-            }
+            } 
         } else if (this.start === "die") {
             return 
         }
 
     }
 
+    collisionWithBean(player) {
+        let spacingBean = 90;
+        let toleranceBean = 50;
+        let beanPosition = this.bean.getPosition()
+        if (beanPosition[0] > player[0] + spacingBean || player[0] - beanPosition[0] >= spacingBean) {
+            return false;
+        } else {
+            if (beanPosition[0] > player[0]) {
+                return beanPosition[0] + beanPosition[1] < player[0] + player[1] + spacingBean;
+            } else {
+                return Math.abs(player[0] - beanPosition[0]) + Math.abs(player[1] - beanPosition[1]) + (toleranceBean / 8) < spacingBean;
+            }
+        }
+    }
+
+
+    eatBean(){
+        console.log("eat!!!")
+    } 
+
     stopPlaying() {
         this.start = "die";
-        const cover = document.createElement("div")
-        const button = document.createElement("button")
-        const dom = document.getElementsByClassName("main-div")[0]
-        cover.classList.add("cover-die");
-        button.classList.add("cover-die-button");
-        button.innerText = "Restart"
-        cover.appendChild(button)
-        dom.appendChild(cover)
-
-        button.addEventListener("click", () => {
-            console.log("dom",dom)
-            console.log("cover", cover)
-            dom.removeChild(cover)
-            this.start = "start"
-        })
+        const cover = document.getElementById("cover-die")
+        cover.style.display = "flex";
     }
 }
 
@@ -306,8 +349,8 @@ class Player {
     }
 
     selfJumpImg() {
-        const gravity = 0.40;
-        const initialSpeed = 12;
+        const gravity = 0.80;
+        const initialSpeed = 42;
         if (this.y > 600 && this.jumping) {
             this.y -= initialSpeed - gravity;
             requestAnimationFrame(this.selfJumpImg)
@@ -369,8 +412,8 @@ class Mushroom {
     move() {
         this.x -= this.speed;
         setInterval(() => {
-            this.speed += 0.0001
-        },50000)
+            this.speed += 0.001
+        },20000)
         if(this.x < -100) {
             this.x = 800
         } 
@@ -388,6 +431,47 @@ class Mushroom {
 }
 
 module.exports = Mushroom;
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports) {
+
+class Bean {
+    constructor(canvas, ctx, speed) {
+        this.canvas = canvas;
+        this.ctx = ctx;
+        this.speed = speed;
+        this.x = canvas.width;
+        this.y = canvas.height / 2;
+        this.getPosition = this.getPosition.bind(this)
+        this.clean = this.clean.bind(this)
+    }
+
+    move() {
+        this.x -= this.speed;
+    }
+
+    draw() {
+        this.ctx.beginPath();
+        this.ctx.arc(this.x, this.y, 10, 0, 2 * Math.PI, true);
+        this.ctx.fillStyle = "yellow";
+        this.ctx.fill();
+        this.ctx.stroke();
+        this.move()
+    }
+
+    getPosition() {
+        return [this.x, this.y];
+    }
+
+    clean() {
+        // this.ctx.globalCompositeOperation = 'destination-out';
+        this.ctx.clearRect(this.x - 50, this.y - 10, 50, 50);
+        console.log("clean")
+    }
+}
+
+module.exports = Bean;
 
 /***/ })
 /******/ ]);

@@ -7,8 +7,8 @@ body {
 
 canvas {
     position: absolute;
-    left: 25%;
-    top: 130px;
+    left: 30%;
+    top: 260px;
     /* display: none; */
 }
 
@@ -28,15 +28,28 @@ canvas {
 #menu {
     height: 600px;
     width: 800px;
-    background: rgb(253,245,230,0.8);
+    background: rgb(253,245,230);
     /* opacity: 0.8; */
     position: absolute;
-    left: 25%;
-    top: 130px;
-    z-index: 2;
+    left: 30%;
+    top: 260px;
+    z-index: 3;
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+#menu-info {
+    height: 600px;
+    width: 800px;
+    position: absolute;
+    left: 30%;
+    top: 260px;
+    z-index: 2;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    
 }
 
 @-webkit-keyframes fadeIn {
@@ -50,17 +63,32 @@ canvas {
     0% { opacity: 1;}
 }
 
-.cover-die {
+#cover-die {
    height: 600px;
     width: 800px;
     background: rgb(236, 69, 18,0.6);
     position: absolute;
-    left: 25%;
-    top: 130px;
+    left: 30%;
+    top: 260px;
     z-index: 3;
-    display: flex;
     justify-content: center;
     align-items: center; 
+    display: none;
+}
+
+.nav {
+    width: 100%;
+    background-color: #fdfdfd;
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0px 20px;
+    border-bottom: 1px solid #dad9d9;
+}
+
+.nav > a {
+    margin: 10px;
 }
 
 
@@ -93,7 +121,7 @@ canvas {
     outline: none;
 }
 
-.cover-die-button {
+#cover-die-button {
     font-size: 30px;
     border-radius: 5px;
     padding: 15px;
@@ -101,5 +129,57 @@ canvas {
     background-color: #eb3d37;
     color: oldlace;
     outline: none;
+}
+
+#score-box {
+    display: flex;
+    justify-content: center;
+    font-size: 28px;
+    font-family: fantasy;
+    color: #012701;  
+}
+
+#score {
+     margin-left: 10px;
+}
+
+
+#info {
+    background-color: white;
+    border: 1px solid gray;
+    border-radius: 5px;
+    width: 200px;
+    margin-left: 25px;
+    padding: 25px;
+    margin-top: 135px;
+}
+
+#how-to-play {
+   font-size: 25px;
+    font-weight: 600;
+    margin-bottom: 10px;
+}
+
+.how-to-play-info {
+    margin-bottom: 10px;
+    font-family: fantasy;
+    color: #012701; 
+}
+
+.footer {
+    background-color: #f9f9f9;
+    height: 50px;
+    display: flex;
+    justify-content: space-between;
+    padding: 30px;
+    border-top: 1px solid #dad9d9;
+    font-family: "Cera Pro", "HelveticaNeue", "Helvetica Neue", "HelveticaNeueRoman", "HelveticaNeue-Roman", "Helvetica Neue Roman", "TeXGyreHerosRegular", "Helvetica", "Tahoma", "Geneva", "Arial", sans-serif;
+    color:grey;
+}
+
+#words {
+    font-size: 30px;
+    color: white;
+    text-shadow: -1px -1px 0 rgb(78, 78, 78), 1px -1px 0 rgb(78, 78, 78), -1px 1px 0 rgb(78, 78, 78), 1px 1px 0 rgb(78, 78, 78);
 }
 
