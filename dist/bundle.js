@@ -170,7 +170,6 @@ class Game {
         if (event.code === "Space" ) {
             event.preventDefault();
             if (!this.called) {
-                this.bounceMp3.play();
                 this.closeCb();
                 const m = document.getElementById("menu")
                 if (m.dataset.check === "off") {
@@ -179,6 +178,7 @@ class Game {
                         this.start = "start";
                         this.called = true;
                         let that = this;
+                        this.bounceMp3.play();
                         setTimeout(() => {
                             that.called = false;
                          },350);
