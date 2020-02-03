@@ -75,12 +75,30 @@
 
 const Game = __webpack_require__(1);
 
+const showHowTo = () => {
+    const ele = document.getElementById('info');
+    ele.classList.remove('hidden');
+}
+
+const hideHowTo = () => {
+    const ele = document.getElementById('info');
+    ele.classList.add('hidden');
+}
+
+window.hideHowTo = hideHowTo;
+
 document.addEventListener('DOMContentLoaded', () => {
     const gameCanvas = document.getElementById('game-canvas');
     const gameCanvasContext = gameCanvas.getContext('2d');
 
     const backgroundCanvas = document.getElementById('background-canvas');
     const backgroundCanvasContext = backgroundCanvas.getContext('2d');
+
+    const openHowTo = document.getElementById('how-to');
+    openHowTo.addEventListener('click', showHowTo);
+
+    const closeHowTo = document.getElementById('close-how-to');
+    closeHowTo.addEventListener('click', hideHowTo);
 
     // const foregroundCanvas = document.getElementById('foreground-canvas');
     // const foregroundCanvasContext = foregroundCanvas.getContext('2d');
@@ -89,25 +107,26 @@ document.addEventListener('DOMContentLoaded', () => {
         gameCanvasContext,
         gameCanvas,
         backgroundCanvasContext,
-        "stop"
+        "stop",
+        hideHowTo
         )
     
     game.draw();
     window.addEventListener('keydown', game.jump);
 
-
-
     const buttonReStart = document.getElementById("cover-die-button")
     const cover = document.getElementById("cover-die")
     const score = document.getElementById("score")
     function reStartGame() {
+        hideHowTo();
         cover.style.display = "none";
         score.innerText = "0"
         const game = new Game(
             gameCanvasContext,
             gameCanvas,
             backgroundCanvasContext,
-            "start"
+            "start",
+            hideHowTo
         )
         game.draw();
         window.addEventListener('keydown', game.jump);
@@ -126,7 +145,7 @@ const Mushroom = __webpack_require__(4);
 const Player = __webpack_require__(3);
 
 class Game {
-    constructor(ctx, gameCanvas, backgroundCtx,action) {
+    constructor(ctx, gameCanvas, backgroundCtx, action, closeCb) {
         this.backgroundCtx = backgroundCtx;
         this.called = false;
         this.ctx = ctx;
@@ -140,6 +159,7 @@ class Game {
         this.discardBean = this.discardBean.bind(this);
         this.draw = this.draw.bind(this);
         this.jump = this.jump.bind(this);
+        this.closeCb = closeCb;
         this.createBackground(backgroundCtx);
         this.createBean(gameCanvas,ctx);
         this.createMushroom(ctx);
@@ -149,8 +169,9 @@ class Game {
     jump(event) {
         if (event.code === "Space" ) {
             event.preventDefault();
-            this.bounceMp3.play();
             if (!this.called) {
+                this.bounceMp3.play();
+                this.closeCb();
                 const m = document.getElementById("menu")
                 if (m.dataset.check === "off") {
                     if (this.start !== "die") {
@@ -454,6 +475,7 @@ class Bean {
         this.ctx.beginPath();
         this.ctx.arc(this.x, this.y, 10, 0, 2 * Math.PI, true);
         this.ctx.fillStyle = "yellow";
+        this.ctx.strokeStyle = "yellow";
         this.ctx.fill();
         this.ctx.stroke();
         this.move();

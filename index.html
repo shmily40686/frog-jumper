@@ -10,6 +10,13 @@
         <audio src="./audio/coin.mp3" id="coin-mp3"></audio>
     </head>
     <body>
+        <div id="info" class="hidden">
+            <div id="close-how-to">[close]</div>
+            <p class="how-to-play-info">Press <strong>Space</strong> to jump.</p>
+            <p>Avoid the mushrooms by jumping over them.</p>
+            <img src="./assets/images/mushroom.png" width="50px" height="50px" />
+            <div class="how-to-play-info">You can eat the <span color="yellow">yellow</span> beans to raise your score!</div>
+        </div>
         <div class="nav">
             <a href="https://github.com/shmily40686">
                 <img src="https://cdn0.iconfinder.com/data/icons/octicons/1024/mark-github-512.png" width="40px" height="40px">
@@ -19,14 +26,8 @@
             </a>
         </div>
         <div class="main-div">
-            <div id="game-title">Frog Jumper</div>
+            <div id="game-title">Frog Jumper<span id="how-to">?</span></div>
             <div id="score-box">Score:<span id="score">0</span></div>
-            <div id="info">
-                <div id="how-to-play">How to Play</div>
-                <div class="how-to-play-info" >Press <strong>Space</strong> to jump. Avoid the mushrooms by jumping over them.</div>
-                <img src="./assets/images/mushroom.png" width="50px" height="50px" />
-                <div class="how-to-play-info">You can eat the <span color="yellow">YELLOW </span>beans to raise your score!</div>
-            </div>
             <main>
                 <div id="menu" data-check="on">
                    <button id="start-game">Start Game</button> 
@@ -43,8 +44,8 @@
             </main>
         </div>
         <div class="footer">
-            <div>Create by Xiaowen Ling</div>
-            <div>© Frog Jumper, 2020</div>
+            <div>Created by Xiaowen Ling</div>
+            <div>©Frog Jumper, 2020</div>
         </div>
     </body>
     <script>
@@ -53,6 +54,7 @@
         const menu = document.getElementById("menu")
 
         function startGame () {
+            window.hideHowTo();
             menu.style[" -webkit-animation"] = "fadeOut 1s"
             menu.style["animation"] = "fadeOut 1s"
             menu.style["animation-fill-mode"] = "forwards"
