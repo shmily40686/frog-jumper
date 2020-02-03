@@ -121,91 +121,97 @@ document.addEventListener('DOMContentLoaded', () => {
 /***/ (function(module, exports, __webpack_require__) {
 
 const Background = __webpack_require__(2);
-const Player = __webpack_require__(3);
-const Mushroom = __webpack_require__(4);
 const Bean = __webpack_require__(5)
+const Mushroom = __webpack_require__(4);
+const Player = __webpack_require__(3);
+
 class Game {
     constructor(ctx, gameCanvas, backgroundCtx,action) {
+        this.backgroundCtx = backgroundCtx;
+        this.called = false;
         this.ctx = ctx;
         this.gameCanvas = gameCanvas;
-        this.backgroundCtx = backgroundCtx;
-        this.start = action
-        
-        this.jump = this.jump.bind(this);
+        this.start = action;
+        this.bounceMp3 = document.getElementById('bounce-mp3');
+        this.impactMp3 = document.getElementById('impact-mp3');
+        this.coinMp3 = document.getElementById('coin-mp3');
+        this.collisionWithBean = this.collisionWithBean.bind(this);
+        this.createBean = this.createBean.bind(this);
+        this.discardBean = this.discardBean.bind(this);
         this.draw = this.draw.bind(this);
-        this.called = false
-
+        this.jump = this.jump.bind(this);
         this.createBackground(backgroundCtx);
-        this.createPlayer(ctx)
-        this.createMushroom(ctx)
-        this.createBeans(gameCanvas,ctx)
-        this.collisionWithBean = this.collisionWithBean.bind(this)
+        this.createBean(gameCanvas,ctx);
+        this.createMushroom(ctx);
+        this.createPlayer(ctx);
     }
 
     jump(event) {
         if (event.code === "Space" ) {
             event.preventDefault();
-            if (!this.called) { 
+            this.bounceMp3.play();
+            if (!this.called) {
                 const m = document.getElementById("menu")
                 if (m.dataset.check === "off") {
                     if (this.start !== "die") {
-                        this.player.performJump()
-                        this.start = "start"
-                        this.called = true
-                        let that = this
+                        this.player.performJump();
+                        this.start = "start";
+                        this.called = true;
+                        let that = this;
                         setTimeout(() => {
-                            that.called = false
-                         },350)
+                            that.called = false;
+                         },350);
                     }
                 } 
             } 
         }
     }
 
-
-    createBackground(backgroundCtx, foregroundCtx) {
+    createBackground() {
         const backgroundImage = new Image();
         backgroundImage.src = './assets/images/background.png';
-        this.background = new Background(backgroundCtx, backgroundImage, 0, 750, 0.8);
-        this.preBackground = new Background(backgroundCtx, backgroundImage, 0, 750, 0)
-
+        this.background = new Background(this.backgroundCtx, backgroundImage, 0, 750, 0.8);
+        this.preBackground = new Background(this.backgroundCtx, backgroundImage, 0, 750, 0);
     }
 
-    createPlayer(ctx) {
-        const frogImage = new Image()
-        frogImage.src = './assets/images/frog.png'
-        this.player = new Player(ctx,frogImage,440,5)
+    createPlayer() {
+        const frogImage = new Image();
+        frogImage.src = './assets/images/frog.png';
+        this.player = new Player(this.ctx, frogImage, 440,5);
     }
 
-    createMushroom(ctx) {
-       const mushroomImage = new Image()
+    createMushroom() {
+       const mushroomImage = new Image();
        mushroomImage.src = './assets/images/mushroom.png';
-       this.mushroom1 = new Mushroom(ctx,mushroomImage,800,440, 4)
-       this.mushroom2 = new Mushroom(ctx, mushroomImage, 1200, 440, 4)
+       this.mushroom1 = new Mushroom(this.ctx, mushroomImage, 800, 440, 4);
+       this.mushroom2 = new Mushroom(this.ctx, mushroomImage, 1200, 440, 4);
     }
 
-    createBeans(gameCanvas,ctx) {
-        this.bean = new Bean(gameCanvas,ctx, 5)
+    createBean() {
+        this.bean = new Bean(this.gameCanvas, this.ctx, 5, this.discardBean);
+    }
+
+    discardBean() {
+        this.bean.clean();
+        this.createBean();
     }
 
     draw() {
         requestAnimationFrame(this.draw);
-        const score = document.getElementById("score")
-        const info = document.getElementById("menu-info")
+        const score = document.getElementById("score");
+        const info = document.getElementById("menu-info");
         if(this.start === "stop") {
-            this.preBackground.draw() 
+            this.preBackground.draw() ;
             this.player.draw();
-            info.style.display = "flex"
+            info.style.display = "flex";
         } else if (this.start === "start") {
-            info.style.display = "none"
+            info.style.display = "none";
             this.background.draw();
             this.player.draw();
             this.mushroom1.draw();
             this.mushroom2.draw();
-            this.bean.draw()
-            // score.innerText = parseInt(score.innerText) + 0.1
-            // calculate was there collision
-            //
+            this.bean.draw();
+
             // player position
             const player = this.player.getPosition();
             // mushroom positions
@@ -215,14 +221,12 @@ class Game {
             ];
 
             if(this.collisionWithBean(player)) {
-                score.innerText = parseInt(score.innerText) + 100
-                this.bean.clean()
-                this.bean = new Bean(this.gameCanvas, this.ctx, 5)
+                this.coinMp3.play();
+                score.innerText = parseInt(score.innerText) + 100;
+                this.discardBean();
             }
            
-
-
-            // .some on [mushrooms] was there collision?
+            // .some on [mushrooms], was there collision?
             if (mushrooms.some(mushroom => {
                 let spacing = 90;
                 let tolerance = 50;
@@ -245,34 +249,27 @@ class Game {
                 this.stopPlaying();
             } 
         } else if (this.start === "die") {
-            return 
-        }
-
-    }
-
-    collisionWithBean(player) {
-        let spacingBean = 90;
-        let toleranceBean = 50;
-        let beanPosition = this.bean.getPosition()
-        if (beanPosition[0] > player[0] + spacingBean || player[0] - beanPosition[0] >= spacingBean) {
-            return false;
-        } else {
-            if (beanPosition[0] > player[0]) {
-                return beanPosition[0] + beanPosition[1] < player[0] + player[1] + spacingBean;
-            } else {
-                return Math.abs(player[0] - beanPosition[0]) + Math.abs(player[1] - beanPosition[1]) + (toleranceBean / 8) < spacingBean;
-            }
+            return;
         }
     }
 
+    collisionWithBean([playerX, playerY]) {
+        let playerSize = 100;
+        let beanSize = 10;
+        let [beanX, beanY] = this.bean.getPosition();
 
-    eatBean(){
-        console.log("eat!!!")
-    } 
+        playerX += playerSize / 2;
+        playerY += playerSize / 2;
+        beanX += beanSize / 2;
+        beanY += beanSize / 2;
+
+        return Math.abs(playerX - beanX) + Math.abs(playerY - beanY) < (playerSize + beanSize) / 1.75;
+    }
 
     stopPlaying() {
+        this.impactMp3.play();
         this.start = "die";
-        const cover = document.getElementById("cover-die")
+        const cover = document.getElementById("cover-die");
         cover.style.display = "flex";
     }
 }
@@ -329,7 +326,6 @@ class Player {
         this.y = posY;
         this.jumping = false;
         this.size = [100,100];
-
         this.jumpImage = this.jumpImage.bind(this);
         this.jumping = false;
         this.selfJumpImg = this.selfJumpImg.bind(this);
@@ -436,15 +432,18 @@ module.exports = Mushroom;
 /* 5 */
 /***/ (function(module, exports) {
 
+const heights = [250, 325, 400];
+
 class Bean {
-    constructor(canvas, ctx, speed) {
+    constructor(canvas, ctx, speed, discardCb) {
         this.canvas = canvas;
         this.ctx = ctx;
         this.speed = speed;
         this.x = canvas.width;
-        this.y = canvas.height / 2;
+        this.y = heights[Math.floor(3 * Math.random())];
         this.getPosition = this.getPosition.bind(this)
         this.clean = this.clean.bind(this)
+        this.discardCb = discardCb;
     }
 
     move() {
@@ -457,7 +456,11 @@ class Bean {
         this.ctx.fillStyle = "yellow";
         this.ctx.fill();
         this.ctx.stroke();
-        this.move()
+        this.move();
+        if (this.x < -10) {
+            // bean passed the left edge
+            this.discardCb();
+        }
     }
 
     getPosition() {
@@ -465,9 +468,7 @@ class Bean {
     }
 
     clean() {
-        // this.ctx.globalCompositeOperation = 'destination-out';
-        this.ctx.clearRect(this.x - 50, this.y - 10, 50, 50);
-        console.log("clean")
+        this.ctx.clearRect(this.x, this.y, 10, 10);
     }
 }
 

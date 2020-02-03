@@ -83,7 +83,6 @@ canvas {
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 0px 20px;
     border-bottom: 1px solid #dad9d9;
 }
 
@@ -91,12 +90,12 @@ canvas {
     margin: 10px;
 }
 
-
-
 .main-div {
     background: linear-gradient(rgba(255,255,255,.8), rgba(255,255,255,.5)), url("https://image.freepik.com/free-vector/seamless-pattern-cute-frogs-with-hearts_49655-275.jpg");
     width: 100%;
     height: 900px;
+    overflow-x: hidden;
+    position: relative;
 }
 
 #game-title {
@@ -143,7 +142,6 @@ canvas {
      margin-left: 10px;
 }
 
-
 #info {
     background-color: white;
     border: 1px solid gray;
@@ -153,6 +151,10 @@ canvas {
     padding: 25px;
     margin-top: 135px;
     text-align: center;
+}
+
+#info > img {
+    padding-bottom: 10px;
 }
 
 #how-to-play {
@@ -170,6 +172,7 @@ canvas {
 .footer {
     background-color: #f9f9f9;
     height: 50px;
+    line-height: 50px;
     display: flex;
     justify-content: space-between;
     padding: 30px;
