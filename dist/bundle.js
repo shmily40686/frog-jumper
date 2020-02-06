@@ -140,9 +140,9 @@ document.addEventListener('DOMContentLoaded', () => {
 /***/ (function(module, exports, __webpack_require__) {
 
 const Background = __webpack_require__(2);
-const Bean = __webpack_require__(5)
+const Bean = __webpack_require__(3)
 const Mushroom = __webpack_require__(4);
-const Player = __webpack_require__(3);
+const Player = __webpack_require__(5);
 
 class Game {
     constructor(ctx, gameCanvas, backgroundCtx, action, closeCb) {
@@ -337,6 +337,91 @@ module.exports = Background;
 /* 3 */
 /***/ (function(module, exports) {
 
+const heights = [250, 325, 400];
+
+class Bean {
+    constructor(canvas, ctx, speed, discardCb) {
+        this.canvas = canvas;
+        this.ctx = ctx;
+        this.speed = speed;
+        this.x = canvas.width;
+        this.y = heights[Math.floor(3 * Math.random())];
+        this.getPosition = this.getPosition.bind(this)
+        this.clean = this.clean.bind(this)
+        this.discardCb = discardCb;
+    }
+
+    move() {
+        this.x -= this.speed;
+    }
+
+    draw() {
+        this.ctx.beginPath();
+        this.ctx.arc(this.x, this.y, 10, 0, 2 * Math.PI, true);
+        this.ctx.fillStyle = "yellow";
+        this.ctx.strokeStyle = "yellow";
+        this.ctx.fill();
+        this.ctx.stroke();
+        this.move();
+        if (this.x < -10) {
+            // bean passed the left edge
+            this.discardCb();
+        }
+    }
+
+    getPosition() {
+        return [this.x, this.y];
+    }
+
+    clean() {
+        this.ctx.clearRect(this.x, this.y, 10, 10);
+    }
+}
+
+module.exports = Bean;
+
+/***/ }),
+/* 4 */
+/***/ (function(module, exports) {
+
+class Mushroom {
+    constructor(ctx, image,x, y, speed) {
+        this.ctx = ctx;
+        this.image = image;
+        this.x = x;
+        this.y = y;
+        this.speed = speed;
+        this.size = [100, 100];
+        this.getPosition = this.getPosition.bind(this);
+    }  
+
+    move() {
+        this.x -= this.speed;
+        setInterval(() => {
+            this.speed += 0.001
+        },20000)
+        if(this.x < -100) {
+            this.x = 800
+        } 
+    }
+
+    draw(ctx) {
+        // this.ctx.clearRect(0, 0, 800, 600);
+        this.ctx.drawImage(this.image, this.x, this.y, this.size[0], this.size[1]);
+        this.move()
+    }
+
+    getPosition() {
+        return [this.x, this.y];
+    }
+}
+
+module.exports = Mushroom;
+
+/***/ }),
+/* 5 */
+/***/ (function(module, exports) {
+
 class Player {
     constructor(ctx, image, posY,speed) {
         this.ctx = ctx;
@@ -410,91 +495,6 @@ class Player {
 }
 
 module.exports = Player;
-
-/***/ }),
-/* 4 */
-/***/ (function(module, exports) {
-
-class Mushroom {
-    constructor(ctx, image,x, y, speed) {
-        this.ctx = ctx;
-        this.image = image;
-        this.x = x;
-        this.y = y;
-        this.speed = speed;
-        this.size = [100, 100];
-        this.getPosition = this.getPosition.bind(this);
-    }  
-
-    move() {
-        this.x -= this.speed;
-        setInterval(() => {
-            this.speed += 0.001
-        },20000)
-        if(this.x < -100) {
-            this.x = 800
-        } 
-    }
-
-    draw(ctx) {
-        // this.ctx.clearRect(0, 0, 800, 600);
-        this.ctx.drawImage(this.image, this.x, this.y, this.size[0], this.size[1]);
-        this.move()
-    }
-
-    getPosition() {
-        return [this.x, this.y];
-    }
-}
-
-module.exports = Mushroom;
-
-/***/ }),
-/* 5 */
-/***/ (function(module, exports) {
-
-const heights = [250, 325, 400];
-
-class Bean {
-    constructor(canvas, ctx, speed, discardCb) {
-        this.canvas = canvas;
-        this.ctx = ctx;
-        this.speed = speed;
-        this.x = canvas.width;
-        this.y = heights[Math.floor(3 * Math.random())];
-        this.getPosition = this.getPosition.bind(this)
-        this.clean = this.clean.bind(this)
-        this.discardCb = discardCb;
-    }
-
-    move() {
-        this.x -= this.speed;
-    }
-
-    draw() {
-        this.ctx.beginPath();
-        this.ctx.arc(this.x, this.y, 10, 0, 2 * Math.PI, true);
-        this.ctx.fillStyle = "yellow";
-        this.ctx.strokeStyle = "yellow";
-        this.ctx.fill();
-        this.ctx.stroke();
-        this.move();
-        if (this.x < -10) {
-            // bean passed the left edge
-            this.discardCb();
-        }
-    }
-
-    getPosition() {
-        return [this.x, this.y];
-    }
-
-    clean() {
-        this.ctx.clearRect(this.x, this.y, 10, 10);
-    }
-}
-
-module.exports = Bean;
 
 /***/ })
 /******/ ]);
