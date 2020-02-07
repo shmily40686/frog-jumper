@@ -113,11 +113,6 @@ document.addEventListener('DOMContentLoaded', () => {
     
     game.draw();
     window.addEventListener('keydown', game.jump);
-    window.addEventListener('click', e => {
-        e.stopPropagation();
-        e.code = 'Space';
-        game.jump(e);
-    });
 
     const buttonReStart = document.getElementById("cover-die-button")
     const cover = document.getElementById("cover-die")
@@ -135,11 +130,6 @@ document.addEventListener('DOMContentLoaded', () => {
         )
         game.draw();
         window.addEventListener('keydown', game.jump);
-        window.addEventListener('click', e => {
-            e.stopPropagation();
-            e.code = 'Space';
-            game.jump(e);
-        });
     }
 
     buttonReStart.addEventListener("click", reStartGame)
@@ -244,7 +234,7 @@ class Game {
             this.bean.draw();
 
             // player position
-            const player = this.player.getPosition();
+            const [playerX, playerY] = this.player.getPosition();
             // mushroom positions
             const mushrooms = [
                 this.mushroom1.getPosition(),
@@ -258,22 +248,20 @@ class Game {
             }
            
             // .some on [mushrooms], was there collision?
-            if (mushrooms.some(mushroom => {
-                let spacing = 90;
-                let tolerance = 50;
+            if (mushrooms.some(([mushroomX, mushroomY]) => {
+                let playerSize = 100;
+                let mushroomSize = 70;
 
-               if (mushroom[0] > player[0] + spacing || player[0] - mushroom[0] >= spacing) {
+               if (mushroomX > playerX + spacing || playerX - mushroomX >= spacing) {
                    // collision not possible
                    return false;
                } else {
-                   // player can collide with mushroom
-                   if (mushroom[0] > player[0]) {
-                       // Mushroom is to the right, player can run into mushroom or land on it.
-                       return mushroom[0] + mushroom[1] < player[0] + player[1] + spacing;
-                   } else {
-                       // Frog is to the right of the mushroom.
-                       return Math.abs(player[0] - mushroom[0]) + Math.abs(player[1] - mushroom[1]) + (tolerance / 8) < spacing;
-                   }
+                   playerX += (playerSize / 2)
+                   playerY += (playerSize / 2)
+                   mushroomX += (mushroomSize / 2)
+                   mushroomY += (mushroomSize / 2)
+
+                   return Math.abs((playerX + playerY) - (mushroomX + mushroomY)) < 0;
                }
             })) {
                 // stop
@@ -447,7 +435,6 @@ class Player {
         this.selfJumpImg = this.selfJumpImg.bind(this);
         this.sefJumping = false;
         this.getPosition = this.getPosition.bind(this);
-
     }
 
     draw() {
