@@ -79,13 +79,13 @@ canvas {
 }
 
 .nav {
-    width: 100%;
     background-color: #fdfdfd;
     max-height: 100px;
     height: 10vh;
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
     align-items: center;
+    padding: 0 20px;
     border-bottom: 1px solid #dad9d9;
 }
 
@@ -119,7 +119,7 @@ canvas {
     padding: 20px;
     border:none;
     background-color: #5c6b5c;
-    color: oldlace;
+    color: #fff;
     outline: none;
 }
 
@@ -214,14 +214,18 @@ canvas {
 
 .footer {
     background-color: #f9f9f9;
-    height: 10vh;
-    line-height: 10vh;
-    max-height: 20px;
+    height: 50px;
     display: flex;
     justify-content: space-between;
     border-top: 1px solid #dad9d9;
     font-family: "Cera Pro", "HelveticaNeue", "Helvetica Neue", "HelveticaNeueRoman", "HelveticaNeue-Roman", "Helvetica Neue Roman", "TeXGyreHerosRegular", "Helvetica", "Tahoma", "Geneva", "Arial", sans-serif;
     color:grey;
+    padding: 0 20px;
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    align-items: center;
 }
 
 #words {
@@ -230,7 +234,23 @@ canvas {
     text-shadow: -1px -1px 0 rgb(78, 78, 78), 1px -1px 0 rgb(78, 78, 78), -1px 1px 0 rgb(78, 78, 78), 1px 1px 0 rgb(78, 78, 78);
 }
 
+.row {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
 .col {
     display: flex;
     flex-direction: column;
+}
+
+.icon-container {
+    height: 40px;
+    width: 40px;
+    display: block;
+}
+
+.github {
+    margin-right: 15px;
 }

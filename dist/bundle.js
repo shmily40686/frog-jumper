@@ -113,6 +113,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     game.draw();
     window.addEventListener('keydown', game.jump);
+    window.addEventListener('click', e => {
+        e.stopPropagation();
+        e.code = 'Space';
+        game.jump(e);
+    });
 
     const buttonReStart = document.getElementById("cover-die-button")
     const cover = document.getElementById("cover-die")
@@ -130,6 +135,11 @@ document.addEventListener('DOMContentLoaded', () => {
         )
         game.draw();
         window.addEventListener('keydown', game.jump);
+        window.addEventListener('click', e => {
+            e.stopPropagation();
+            e.code = 'Space';
+            game.jump(e);
+        });
     }
 
     buttonReStart.addEventListener("click", reStartGame)
