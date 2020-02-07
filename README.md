@@ -81,24 +81,23 @@ The same logic is found in the background, so everything is changing x coordinat
 
 Collision detection is used to track whether Hoppy lands on/ runs into a mushroom. It is also used to capture when Hoppy collects a bean. The algorithms for this require knowing the positions of the player and the object in question.
 
-I modify the coordinates (originally the top left corner as canvas requires) to the center of each entity. Then, I check if there was a collision using a distance algorithm like so:
+Since canvas rendering describes an item's position as the coordinates of the top left corner, the algorithm changes if the player is on the left or right side of the mushroom. THen, we can just user a standard a^2 + b^2 = c^2 calculation to determine the distance.
 
 ```
-    collisionWithBean([playerX, playerY]) {
-        let playerSize = 100;
-        let beanSize = 10;
-        let [beanX, beanY] = this.bean.getPosition();
+    if (mushX > playerX + spacing || playerX - mushX >= spacing) {
+        // collision not possible
+        return false;
+    } else {
+        const xDifference = Math.abs(mushX - playerX);
+        const yDifference = Math.abs(mushY - playerY);
 
-        playerX += playerSize / 2;
-        playerY += playerSize / 2;
-        beanX += beanSize / 2;
-        beanY += beanSize / 2;
-
-        return Math.abs(playerX - beanX) + Math.abs(playerY - beanY) < (playerSize + beanSize) / 1.75;
+        if (mushX - playerX < spacing) {
+            return Math.sqrt((xDifference * xDifference) + (yDifference * yDifference)) < spacing;
+        } else {
+            return Math.sqrt((xDifference * xDifference) + (yDifference * yDifference)) < spacing / 3;
+        }
     }
 ```
-
-Calculating collision in this way takes complexity out of the equation by being unaffected by which is above the other (the player or the bean) because it actually calculates the distance between the centers of the two.
 
 ##### Hoppy jump
 
